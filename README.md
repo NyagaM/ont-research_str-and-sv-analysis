@@ -1,5 +1,5 @@
 # Repeat expansion (STRs) and structural variant (SVs) analysis on long-read (ONT) data
-ont-research_str-and-sv-analysis is a pipeline to call tandem repeat expansions (STRs) and structural variants (SVs) with annotation on long-read sequencing (LRS). This pipeline is inspired by my work on 
+`ont-research_str-and-sv-analysis` is a pipeline to call tandem repeat expansions (STRs) and structural variants (SVs) with annotation on long-read sequencing (LRS). This pipeline is inspired by my work on 
 Epilepsy Research, and the fact that LRS has the potential to comprehensively identify all medically relevant genome variations, including complex SVs and STRs associated with diseases 
 that are commonly missed by short-read sequencing (SRS) approaches.
 
