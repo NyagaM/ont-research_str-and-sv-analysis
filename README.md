@@ -12,8 +12,8 @@ Regions to genotype STRs should be provided as a TAB separated list "e.g. chrX 1
 
 # Structural variants:
 Structural variants are called by 3 pipelines; [sniffles2](https://github.com/fritzsedlazeck/Sniffles/releases), [cuteSV](https://github.com/tjiangHIT/cuteSV), and [SVIM](https://github.com/eldariont/svim), 
-which call SVs based on different metrics. [combiSV](https://github.com/ndierckx/combiSV) is then applied to combine SV calls from the 3 pipelines into a superior call set per sample. This superior 
-call then set for annotation by [AnnotSV](https://github.com/lgmgeo/AnnotSV). 
+which call SVs based on different metrics. [combiSV](https://github.com/ndierckx/combiSV) is then applied to combine SV calls from the 3 pipelines into a superior call set per sample. The resulting superior 
+call set is then annotated by [AnnotSV](https://github.com/lgmgeo/AnnotSV). 
 
 # Structural variant annotation:
 Within the pipeline, structural variants can also be annotated using two annotation tools, [AnnotSV](https://github.com/lgmgeo/AnnotSV) and [SvAnna](https://github.com/TheJacksonLaboratory/SvAnna/tree/master).
