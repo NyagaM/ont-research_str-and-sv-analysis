@@ -1,5 +1,5 @@
 # Repeat expansion (STRs) and structural variant (SVs) analysis on long-read (ONT) data
-`ont-research_str-and-sv-analysis` is a pipeline to call tandem repeat expansions (STRs) and structural variants (SVs) with annotation on long-read sequencing (LRS). This pipeline is inspired by my work on 
+`ont-research_str-and-sv-analysis` is a pipeline to call tandem repeat expansions (STRs) and structural variants (SVs) with annotation on long-read sequencing (LRS) bam files. This pipeline is inspired by my work on 
 Epilepsy Research, and the fact that LRS has the potential to comprehensively identify all medically relevant genome variations, including complex SVs and STRs associated with diseases 
 that are commonly missed by short-read sequencing (SRS) approaches.
 
@@ -33,13 +33,13 @@ To view options:
 
 `$ nextflow run main.nf --help`
 
-Running example:
+To run the workflow, use the following command:
 
-`$ nextflow run main.nf -profile standard --input_dir path/to/folder/with/bams --output_dir path/to/results --ref path/to/ref.fasta(hg38) --HPO_terms path/to/HPO_terms.txt 
---STR_regions path/to/locusIDs_for_STR_genotyping.txt --annotationsDir path/to/annotsv/annotation/folder/
-`
-
-
-
-
-
+```bash
+nextflow run main.nf -profile standard \
+    --input_dir path/to/folder/with/bams \
+    --output_dir path/to/results \
+    --ref path/to/ref.fasta(hg38) \
+    --HPO_terms path/to/HPO_terms.txt \
+    --STR_regions path/to/locusIDs_for_STR_genotyping.txt \
+    --annotationsDir path/to/annotsv/annotation/folder/
