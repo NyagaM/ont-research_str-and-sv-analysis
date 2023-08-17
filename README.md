@@ -16,3 +16,14 @@ which call SVs based on different metrics. [combiSV](https://github.com/ndierckx
 call then set for annotation by [AnnotSV](https://github.com/lgmgeo/AnnotSV). 
 
 # Structural variant annotation:
+Within the pipeline, structural variants can also be annotated using two annotation tools, [AnnotSV](https://github.com/lgmgeo/AnnotSV) and [SvAnna](https://github.com/TheJacksonLaboratory/SvAnna/tree/master).
+SvAnna is an annotation tool that was recently developed to annotate SVs from long-read sequencing data. However, it does not annotate `DELs` from combiSV, thus it is better to annotate SVs from each caller individually using SvAnna. AnnotSV can annotate the superior call set from combiSV, thus enabling accurate annotation of clinically relevant SVs from these two sources. 
+
+To use [SvAnna](https://github.com/TheJacksonLaboratory/SvAnna/tree/master), you need to provide HPO terms (optional). HPO terms should be provided as follows "e.g. `--phenotype-term HP:0001249 --phenotype-term HP:0001250"`, otherwise SvAnna annotation will be skipped. 
+
+To use [AnnotSV](https://github.com/lgmgeo/AnnotSV) (required), you need to first run the `INSTALL_annotations.sh` in a directory, which downloads and installs annotation sources for AnnotSV, then provide this directory 
+using this flag `--annotationsDir`. 
+
+# Installation and Usage:
+$ git clone 
+
