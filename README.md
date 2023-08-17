@@ -21,7 +21,7 @@ SvAnna is an annotation tool that was recently developed to annotate SVs from lo
 
 To use [SvAnna](https://github.com/TheJacksonLaboratory/SvAnna/tree/master), you need to provide HPO terms (optional). HPO terms should be provided as follows "e.g. `--phenotype-term HP:0001249 --phenotype-term HP:0001250"`, otherwise SvAnna annotation will be skipped. 
 
-To use [AnnotSV](https://github.com/lgmgeo/AnnotSV) (required), you need to first run the `INSTALL_annotations.sh` in a directory, which downloads and installs annotation sources for AnnotSV, then provide this directory 
+To use [AnnotSV](https://github.com/lgmgeo/AnnotSV) (required), you need to first run the `INSTALL_annotations.sh`, which downloads and installs annotation sources for AnnotSV, then provide this directory 
 using this flag `--annotationsDir`. 
 
 # Installation and Usage:
