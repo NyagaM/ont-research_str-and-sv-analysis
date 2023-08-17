@@ -25,5 +25,21 @@ To use [AnnotSV](https://github.com/lgmgeo/AnnotSV) (required), you need to firs
 using this flag `--annotationsDir`. 
 
 # Installation and Usage:
-$ git clone 
+`$ git clone https://github.com/NyagaM/ont-research_str-and-sv-analysis.git` 
+
+To view options:
+
+`$ cd ont-research_str-and-sv-analysis`
+
+`$ nextflow run main.nf --help`
+
+Running example:
+
+`$ nextflow run main.nf -profile standard --input_dir path/to/folder/with/bams --output_dir path/to/results --ref path/to/ref.fasta(hg38) --HPO_terms path/to/HPO_terms.txt 
+--STR_regions path/to/locusIDs_for_STR_genotyping.txt --annotationsDir path/to/annotsv/annotation/folder/
+`
+
+
+
+
 
