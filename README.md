@@ -27,7 +27,6 @@ using this flag `--annotationsDir`.
 # Installation and Usage:
 ```bash
 $ git clone https://github.com/NyagaM/ont-research_str-and-sv-analysis.git
-
 ```
 To view options:
 
