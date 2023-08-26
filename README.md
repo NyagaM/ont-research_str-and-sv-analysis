@@ -25,13 +25,15 @@ To use [AnnotSV](https://github.com/lgmgeo/AnnotSV) (required), you need to firs
 using this flag `--annotationsDir`. 
 
 # Installation and Usage:
-`$ git clone https://github.com/NyagaM/ont-research_str-and-sv-analysis.git` 
+```bash
+$ git clone https://github.com/NyagaM/ont-research_str-and-sv-analysis.git
 
+```
 To view options:
 
 ```bash
-`$ cd ont-research_str-and-sv-analysis`
-`$ nextflow run main.nf --help`
+$ cd ont-research_str-and-sv-analysis
+$ nextflow run main.nf --help
 ```
 
 To run the workflow, use the following command:
