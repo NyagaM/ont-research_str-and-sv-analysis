@@ -4,7 +4,7 @@ Epilepsy Research, and the fact that LRS has the potential to comprehensively id
 that are commonly missed by short-read sequencing (SRS) approaches.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/), a bioinformatics workflow manager that enables the development of portable and reproducible workflows. 
-There is a Docker container that includes all the tools/softwares required by the pipeline, which makes the results highly reproducible. 
+There is a docker image available from [DockerHub](https://hub.docker.com/repository/docker/nyagam/ont-research_str-and-sv-with-annotation/general) that contains all the tools/softwares required by the pipeline, making results highly reproducible. 
 
 # Repeat expansions:
 Repeat expansions analysis is performed by [NanoRepeat](https://github.com/WGLab/NanoRepeat). This analysis is optional and is only triggered when regions for STR quantification are provided with the flag `--STR_regions`.
@@ -29,9 +29,10 @@ using this flag `--annotationsDir`.
 
 To view options:
 
+```bash
 `$ cd ont-research_str-and-sv-analysis`
-
 `$ nextflow run main.nf --help`
+```
 
 To run the workflow, use the following command:
 
@@ -43,3 +44,4 @@ nextflow run main.nf -profile standard \
     --HPO_terms path/to/HPO_terms.txt \
     --STR_regions path/to/locusIDs_for_STR_genotyping.txt \
     --annotationsDir path/to/annotsv/annotation/folder/
+```
