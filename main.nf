@@ -9,7 +9,7 @@ Options:
   --input_dir       Input directory containing the input bam files (required)
   --output_dir      Output directory (required)
   --ref             Path to the Hg38 reference genome (required)
-  --annotationsDir  Path to AnnotSV annotation directory (required)  
+  --annotationsDir  Path to AnnotSV annotation directory (optional); sv calling will be skipped if not provided  
   --HPO_terms       HPO terms for SV annotation using SvAnna from individual SV callers [cuteSV, sniffles2, svim] (optional)
                     :HPO terms should be provided as follows "e.g. --phenotype-term HP:0001249 --phenotype-term HP:0001250", otherwise SvAnna annotation will be skipped
   --STR_regions     STR regions for quantification using NanoRepeat (optional)
@@ -22,7 +22,7 @@ Other flags:
 
 // Parse command-line arguments
 params.help = false
-if (params.help || !params.input_dir) {
+if (params.help || !params.input_dir || !params.output_dir || !params.ref) {
     println helpMessage
     exit 0
 }
@@ -37,22 +37,11 @@ params.annotationsDir = ""
 params.tr_bed_path = "human_GRCh38_no_alt_analysis_set.trf.bed"
 tr_bed = file("${workflow.projectDir}/${params.tr_bed_path}")
 
-
 // To run SvAnna annotation, HPO terms should be provided with --HPO_terms as follows "e.g. --phenotype-term HP:0001249 --phenotype-term HP:0001250"; otherwise no SvAnna annotation will be skipped
 // To run NanoRepeat STR quantification, a file containing locus (tab seperated) to genotype STRs should be provided with --STR_regions as follows "e.g. chrX\t148500638\t148500683\tCCG
 
-if (params.input_dir == "" || params.output_dir == "" || params.ref == "" || params.annotationsDir == "") {
-    exit 1, "--input_dir, --output_dir, --annotationsDir, and --ref MUST be specified."
-}
-
 input_ch = Channel.fromPath(params.input_dir + '/*.bam', checkIfExists: true)
     .map { [it.baseName, file(it), file(it + '.bai')] }
-
-def skip_annotation = params.HPO_terms == "" || params.HPO_terms == null
-
-if (skip_annotation) {
-    println("--HPO_terms not provided: Skipping SvAnna annotation")
-}
 
     
 /* ------------------------- cuteSV ------------------------- */
@@ -366,11 +355,14 @@ workflow {
 
     // Collect the output and merge the VCF files for each sample separately to run consensus SV merging in combiSV process
     merged_vcfs = cutesv_calls.join(svim_calls, by: 0).join(sniffles_calls, by: 0)
-
     combisv_results = CombiSV_Consensus_Merging(merged_vcfs)
 
     // Pass the output from the combiSV process as input to the Annotsv_annotation process
-    Annotsv_annotation_results = AnnotSV_Consensus_Annotation(combisv_results.consensus_vcf)
+    if (params.annotationsDir != "" && params.annotationsDir != null) {
+        Annotsv_annotation_results = AnnotSV_Consensus_Annotation(combisv_results.consensus_vcf)
+    } else {
+        println("--annotationsDir not provided: Skipping AnnotSV annotation of consensus SVs")
+    }
 
     // Run STR analysis
     if (params.STR_regions != "" && params.STR_regions != null) {
