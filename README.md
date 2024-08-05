@@ -7,11 +7,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/), a bioinformati
 There is a docker image available from [DockerHub](https://hub.docker.com/repository/docker/nyagam/ont-research_str-and-sv-with-annotation/general) that contains all the tools/softwares required by the pipeline, making results highly reproducible. 
 
 # Repeat expansions:
-Repeat expansions analysis is performed by [NanoRepeat](https://github.com/WGLab/NanoRepeat). This analysis is optional and is only triggered when regions for STR quantification are provided with the flag `--STR_regions`.
+Repeat expansions analysis is performed by [NanoRepeat](https://github.com/WGLab/NanoRepeat). This analysis is optional and is only triggered with flags `--str` and `--STR_regions` regions for STR quantification.
 Regions to genotype STRs should be provided as a TAB separated list "e.g. chrX 148500638 148500683 CCG", otherwise STR quantification will be skipped. 
 
 # Structural variants:
-Structural variants are called by 3 pipelines; [sniffles2](https://github.com/fritzsedlazeck/Sniffles/releases), [cuteSV](https://github.com/tjiangHIT/cuteSV), and [SVIM](https://github.com/eldariont/svim), 
+Structural variants are called by 3 pipelines using this flag `--consensus`; [sniffles2](https://github.com/fritzsedlazeck/Sniffles/releases), [cuteSV](https://github.com/tjiangHIT/cuteSV), and [SVIM](https://github.com/eldariont/svim), 
 which call SVs based on different metrics. [combiSV](https://github.com/ndierckx/combiSV) is then applied to combine SV calls from the 3 pipelines into a superior call set per sample. The resulting superior 
 call set is then annotated by [AnnotSV](https://github.com/lgmgeo/AnnotSV). 
 
@@ -39,6 +39,8 @@ To run the workflow, use the following command:
 
 ```bash
 nextflow run main.nf -profile standard \
+    --str \
+    --consensus \
     --input_dir path/to/folder/with/bams \
     --output_dir path/to/results \
     --ref path/to/ref.fasta(hg38) \
