@@ -14,6 +14,8 @@ Options:
                     :HPO terms should be provided as txt file as follows "e.g. --phenotype-term HP:0001249 --phenotype-term HP:0001250", otherwise SvAnna annotation will be skipped
   --STR_regions     STR regions for quantification using NanoRepeat (optional)
                     :Regions to genotype STRs should be provided as a TAB separated file "e.g. chrX\t148500638\t148500683\tCCG", otherwise STR quantification will be skipped
+  --str             Flag to trigger STR genotyping using nanoRepeat (requires --STR_regions)
+  --consensus       Flag to trigger all processes except nanoRepeat
   
 Other flags:
   --help           Print this help message
@@ -22,6 +24,9 @@ Other flags:
 
 // Parse command-line arguments
 params.help = false
+params.str = false
+params.consensus = false
+
 if (params.help || !params.input_dir || !params.output_dir || !params.ref) {
     println helpMessage
     exit 0
@@ -148,7 +153,7 @@ process svim {
         --sample ${bam.baseName} \
         --min_sv_size 50 \
         --max_sv_size 100000 \
-        --types DEL,INS,INV,DUP:TANDEM,DUP:INT,BND \
+        --types DEL,INS,INV,DUP:TANDEM,DUP:INT \
         --minimum_depth 4  &&
     
     bcftools sort variants.vcf -o sorted.variants.vcf
@@ -328,7 +333,7 @@ process annotate_mergedCalls {
 
 process nanoRepeat {
     label 'lrs_analysis'
-    publishDir "${params.output_dir}/STRs/${bam.baseName}", mode: 'copy'
+    publishDir "${params.output_dir}/STRs/", mode: 'copy'
     cpus 4
     memory '12 GB'
 
@@ -336,8 +341,7 @@ process nanoRepeat {
     tuple val(name), file(bam), file(bai)
 
     output:
-    tuple path("${bam.baseName}*.png"), path("${bam.baseName}*.txt"), path("${bam.baseName}*.fastq"), emit: png_txt_and_fastqs
-
+    path("${bam.baseName}.details")
     script:
     """
     source /opt/conda/bin/activate lrs_analysis
@@ -347,43 +351,54 @@ process nanoRepeat {
         --ref_fasta ${params.ref} \
         --repeat_region_bed ${params.STR_regions} \
         --num_cpu ${task.cpus} \
+        -d ont_q20 \
         -o ${bam.baseName}
     """
 }
 
 workflow {
-    cutesv_calling_results = cutesv(input_ch)
-    svim_calling_results = svim(input_ch)
-    sniffles_calling_results = sniffles2(input_ch)
-
-    if (params.HPO_terms != "" && params.HPO_terms != null) {
-        cutesv_vcf_annotation_results = annotate_cutesv_vcf(cutesv_calling_results, params.HPO_terms)
-        svim_vcf_annotation_results = annotate_svim_vcf(svim_calling_results, params.HPO_terms)
-        sniffles_vcf_annotation_results = annotate_sniffles2_vcf(sniffles_calling_results, params.HPO_terms)
+    if (params.str && !params.consensus) {
+        // Run STR analysis only
+        if (params.STR_regions != "" && params.STR_regions != null) {
+            STR_analysis_results = nanoRepeat(input_ch)
+        } else {
+            println("--STR_regions not provided: Skipping quantification of STRs using NanoRepeat")
+        }
     } else {
-        println("--HPO_terms not provided: Skipping SvAnna annotation of VCFs from individual SV callers [CuteSV, Sniffles2, SVIM]")
-    }
+        // Run SV calling processes
+        cutesv_calling_results = cutesv(input_ch)
+        svim_calling_results = svim(input_ch)
+        sniffles_calling_results = sniffles2(input_ch)
 
-    cutesv_calls = cutesv_calling_results.cutesv_vcf.map { file -> [file.baseName.split('_')[0], file] }
-    svim_calls = svim_calling_results.svim_vcf.map { file -> [file.baseName.split('_')[0], file] }
-    sniffles_calls = sniffles_calling_results.sniffles_vcf.map { file -> [file.baseName.split('_')[0], file] }
+        // Run SvAnna annotation if HPO terms are provided
+        if (params.HPO_terms != "" && params.HPO_terms != null) {
+            cutesv_vcf_annotation_results = annotate_cutesv_vcf(cutesv_calling_results, params.HPO_terms)
+            svim_vcf_annotation_results = annotate_svim_vcf(svim_calling_results, params.HPO_terms)
+            sniffles_vcf_annotation_results = annotate_sniffles2_vcf(sniffles_calling_results, params.HPO_terms)
+        } else {
+            println("--HPO_terms not provided: Skipping SvAnna annotation of VCFs from individual SV callers [CuteSV, Sniffles2, SVIM]")
+        }
 
-    // Collect the output and merge the VCF files for each sample separately to run consensus SV merging in combiSV process
-    merged_vcfs = cutesv_calls.join(svim_calls, by: 0).join(sniffles_calls, by: 0)
-    combisv_results = mergeCalls(merged_vcfs)
+        cutesv_calls = cutesv_calling_results.cutesv_vcf.map { file -> [file.baseName.split('_')[0], file] }
+        svim_calls = svim_calling_results.svim_vcf.map { file -> [file.baseName.split('_')[0], file] }
+        sniffles_calls = sniffles_calling_results.sniffles_vcf.map { file -> [file.baseName.split('_')[0], file] }
 
-    // Pass the output from the combiSV process as input to the Annotsv_annotation process
-    if (params.annotationsDir != "" && params.annotationsDir != null) {
-        Annotsv_annotation_results = annotate_mergedCalls(combisv_results.consensus_vcf)
-    } else {
-        println("--annotationsDir not provided: Skipping AnnotSV annotation of consensus SVs")
-    }
+        // Collect the output and merge the VCF files for each sample separately to run consensus SV merging in combiSV process
+        merged_vcfs = cutesv_calls.join(svim_calls, by: 0).join(sniffles_calls, by: 0)
+        combisv_results = mergeCalls(merged_vcfs)
 
-    // Run STR analysis
-    if (params.STR_regions != "" && params.STR_regions != null) {
-        STR_analysis_results = nanoRepeat(input_ch)
-    } else {
-        println("--STR_regions not provided: Skipping quantification of STRs using NanoRepeat")
+        // Pass the output from the combiSV process as input to the Annotsv_annotation process
+        if (params.annotationsDir != "" && params.annotationsDir != null) {
+            Annotsv_annotation_results = annotate_mergedCalls(combisv_results.consensus_vcf)
+        } else {
+            println("--annotationsDir not provided: Skipping AnnotSV annotation of consensus SVs")
+        }
+
+        // Run STR analysis if --str is also provided
+        if (params.str && params.STR_regions != "" && params.STR_regions != null) {
+            STR_analysis_results = nanoRepeat(input_ch)
+        } else if (params.str) {
+            println("--STR_regions not provided: Skipping quantification of STRs using NanoRepeat")
+        }
     }
 }
-
