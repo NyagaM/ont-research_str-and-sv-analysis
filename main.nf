@@ -156,7 +156,7 @@ process svim {
         --types DEL,INS,INV,DUP:TANDEM,DUP:INT \
         --minimum_depth 4  &&
     
-    bcftools sort variants.vcf -o sorted.variants.vcf
+    bcftools sort variants.vcf --temp-dir ./ -o sorted.variants.vcf
     bcftools view -i 'QUAL >= 5' sorted.variants.vcf -o sorted.QUAL.variants.vcf
     bcftools view -i 'FILTER="PASS"' sorted.QUAL.variants.vcf -o ${bam.baseName}_svim.filtered.vcf
     """
